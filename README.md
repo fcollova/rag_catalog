@@ -10,7 +10,7 @@ Uno strumento interattivo per navigare, classificare e confrontare 40 tecniche d
 
 ```
 rag-taxonomy.html   →  applicazione interattiva (singolo file, zero dipendenze)
-RAG.pdf             →  catalogo originale con le 40 schede tecniche
+rag_catalog_v0.1.pdf             →  catalogo originale con le 40 schede tecniche
 README.md           →  questo file
 ```
 
