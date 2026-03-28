@@ -120,99 +120,12 @@ Ogni tecnica nel tool ha un badge cliccabile **`#N p.X`** che apre direttamente 
 
 ---
 
-## Come pubblicare su GitHub Pages
-
-**1. Crea il repository**
-```bash
-git init rag-taxonomy
-cd rag-taxonomy
-cp /path/to/rag-taxonomy.html index.html
-cp /path/to/RAG.pdf RAG.pdf
-git add .
-git commit -m "Initial commit"
-gh repo create rag-taxonomy --public --push
-```
-
-**2. Attiva GitHub Pages**
-
-Vai in `Settings → Pages → Branch: main → Folder: / (root)` e salva. Il sito sarà disponibile in ~60 secondi su:
-```
-https://<username>.github.io/rag-taxonomy/
-```
-
-**3. Collega il PDF**
-
-Nel file `index.html`, modifica la variabile in cima allo script:
-```js
-const PDF_URL = "https://<username>.github.io/rag-taxonomy/RAG.pdf";
-```
-
-I badge `#N p.X` apriranno il PDF direttamente alla pagina della scheda.
-
----
-
-## Come pubblicare su GitHub Gist
-
-Se preferisci un Gist (senza GitHub Pages):
-
-1. Vai su [gist.github.com](https://gist.github.com)
-2. Crea un Gist pubblico con il file `rag-taxonomy.html`
-3. Per visualizzarlo renderizzato usa:
-   ```
-   https://htmlpreview.github.io/?https://gist.github.com/<username>/<gist-id>/raw/rag-taxonomy.html
-   ```
-4. Per collegare il PDF, caricalo su Google Drive con accesso pubblico e usa:
-   ```js
-   const PDF_URL = "https://drive.google.com/uc?export=download&id=<FILE_ID>";
-   ```
-
----
-
-## Caratteristiche tecniche
-
-- **Zero dipendenze** — nessun framework JS, nessun bundler. Font da Google Fonts, tutto il resto inline.
-- **Single file** — `rag-taxonomy.html` è autocontenuto (~97 KB). Si apre direttamente dal filesystem locale.
-- **Dark mode** — tema scuro fisso, leggibile su qualsiasi schermo.
-- **Responsive** — navigabile su mobile (layout a colonna singola sotto 768px).
-- **Accessibile** — navigazione da tastiera, `Escape` chiude la modale PDF.
-- **Collega al PDF originale** — ogni tecnica ha un badge che apre la scheda corrispondente nel PDF. Basta impostare `PDF_URL`.
-
----
-
-## Struttura del codice
-
-```
-rag-taxonomy.html
-├── <style>              CSS inline (~300 righe, variabili CSS per dark mode)
-├── PDF modal            Modale per visualizzare le schede PDF
-├── <header>             Titolo, descrizione, link autore, download PDF
-├── .nav-tabs            5 tab di navigazione
-├── #tab-axes            Tassonomia per assi (left panel + right panel)
-├── #tab-uc              Tassonomia per use case
-├── #tab-flow            Flowchart decisionale
-├── #tab-compat          Tassonomia compatibilità
-├── #tab-cost            Profilo di costo (tabella ordinabile)
-├── <footer>             Crediti autore, link LinkedIn/GitHub, download PDF
-└── <script>             ~700 righe JS vanilla (dati + render functions)
-    ├── PDF_URL config
-    ├── TECH_MAP (40 tecniche → {num, page})
-    ├── TECH_DESC (descrizioni per ogni tecnica)
-    ├── AXES data (4 assi × N categorie × M tecniche)
-    ├── USE_CASES data (8 use case × cards)
-    ├── FLOW_TREE data (albero decisionale)
-    ├── COMPAT_DATA (sinergie, ridondanze, conflitti)
-    ├── COST_DATA (40 righe × 3 componenti)
-    └── render functions + event handlers
-```
-
----
-
 ## Catalogo originale
 
 Le 40 schede tecniche sono tratte da:
 
 > **RAG Techniques Catalog** · Versione 2.0 · 2025  
-> Francesco Collovà — [francesco.collova@gmail.com](mailto:francesco.collova@gmail.com)  
+> Francesco Collovà — [francesco.collova @ gmail.com](mailto:francesco.collova @ gmail.com)  
 > [linkedin.com/in/fcollova](https://www.linkedin.com/in/fcollova/)  
 >
 > Ogni scheda include: descrizione estesa · diagramma architetturale · pro/contro · complessità · esempio di codice Python · riferimenti bibliografici.
