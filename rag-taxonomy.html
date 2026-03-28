@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG Techniques Taxonomy — 40 tecniche, 5 tassonomie</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  :root{--bg:#0d0d0f;--bg2:#141416;--bg3:#1a1a1e;--border:rgba(255,255,255,0.08);--border-active:rgba(255,255,255,0.22);--text:#e8e6e0;--muted:#7a7870;--accent:#c8f04e;--accent2:#4ecdf0;--accent3:#f07c4e;--accent4:#bc8cf0}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-weight:300;min-height:100vh;line-height:1.6}
+  header{padding:40px 40px 28px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .header-left h1{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:500;letter-spacing:-0.5px;margin-bottom:5px}
+  .header-left p{font-size:12px;color:var(--muted);max-width:480px}
+  .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .badge{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:4px 10px;border-radius:4px;border:1px solid var(--border);color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .btn-dl{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;padding:7px 14px;border-radius:6px;border:1px solid rgba(200,240,78,.35);background:rgba(200,240,78,.07);color:var(--accent);cursor:pointer;text-decoration:none;transition:all .2s}
+  .btn-dl:hover{background:rgba(200,240,78,.14);border-color:rgba(200,240,78,.6)}
+  .nav-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 40px;background:var(--bg2)}
+  .nav-tab{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;padding:14px 20px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none}
+  .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .nav-tab:hover:not(.active){color:var(--text)}
+  .content-area{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 175px)}
+  .left-panel{border-right:1px solid var(--border);background:var(--bg2);overflow-y:auto;max-height:calc(100vh - 175px);position:sticky;top:0}
+  .sec-hdr{padding:14px 20px 8px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+  .ax-group{border-bottom:1px solid var(--border)}
+  .ax-group-hdr{padding:11px 20px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:color .15s;user-select:none}
+  .ax-group-hdr:hover,.ax-group-hdr.open{color:var(--text)}
+  .chevron{transition:transform .2s;font-size:10px}
+  .ax-group-hdr.open .chevron{transform:rotate(180deg)}
+  .ax-items{display:none}
+  .ax-items.open{display:block}
+  .ax-item{padding:8px 20px 8px 32px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent;display:flex;align-items:center;gap:8px}
+  .ax-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+  .ax-item.active{color:var(--text);background:rgba(255,255,255,.05);border-left-color:var(--accent)}
+  .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .uc-item{padding:13px 20px;cursor:pointer;border-bottom:1px solid var(--border);transition:all .15s;display:flex;align-items:flex-start;gap:11px}
+  .uc-item:hover{background:rgba(255,255,255,.03)}
+  .uc-item.active{background:rgba(255,255,255,.06);border-left:2px solid var(--accent2)}
+  .uc-icon{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+  .uc-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+  .uc-sub{font-size:11px;color:var(--muted)}
+  .right-panel{padding:34px 40px;overflow-y:auto;max-height:calc(100vh - 175px)}
+  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:380px;color:var(--muted);text-align:center;gap:10px}
+  .empty .arr{font-size:26px;opacity:.2}
+  .empty .hint{font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:.5}
+  .d-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .d-title{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:500;margin-bottom:7px;line-height:1.3}
+  .d-sub{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:24px}
+  .d-sec-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:11px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+  .d-body{font-size:13px;color:var(--text);line-height:1.75;opacity:.85;margin-bottom:24px}
+  /* technique grid for axis detail */
+  .tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:11px}
+  .tech-card{border:1px solid var(--border);border-radius:9px;padding:14px;background:var(--bg3);transition:border-color .15s;display:flex;flex-direction:column;gap:9px}
+  .tech-card:hover{border-color:var(--border-active)}
+  .tech-card-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .tech-card-name{font-size:12px;font-weight:500;color:var(--text);line-height:1.3}
+  .tech-card-desc{font-size:11px;color:var(--muted);line-height:1.5}
+  /* pdf badge */
+  .pdf-badge{display:inline-flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:3px 7px;border-radius:4px;border:1px solid rgba(200,240,78,.25);background:rgba(200,240,78,.06);color:var(--accent);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;vertical-align:middle}
+  .pdf-badge:hover{background:rgba(200,240,78,.14);border-color:rgba(200,240,78,.5)}
+  /* use case cards */
+  .uc-tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:11px}
+  .uc-tech-card{border:1px solid var(--border);border-radius:8px;padding:13px;background:var(--bg3);transition:border-color .15s}
+  .uc-tech-card:hover{border-color:var(--border-active)}
+  .uc-tech-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:6px;flex-wrap:wrap}
+  .uc-tech-name{font-size:12px;font-weight:500;color:var(--text)}
+  .uc-tech-badges{display:flex;align-items:center;gap:5px}
+  .uc-tech-why{font-size:11px;color:var(--muted);line-height:1.45}
+  .tier-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.5px;padding:2px 7px;border-radius:3px;text-transform:uppercase}
+  .tier-core{background:rgba(78,205,240,.12);color:var(--accent2);border:1px solid rgba(78,205,240,.2)}
+  .tier-boost{background:rgba(200,240,78,.1);color:var(--accent);border:1px solid rgba(200,240,78,.2)}
+  .tier-adv{background:rgba(188,140,240,.1);color:var(--accent4);border:1px solid rgba(188,140,240,.2)}
+  /* axis overview items */
+  .ax-overview-item{border:1px solid var(--border);border-radius:8px;padding:13px 15px;background:var(--bg3);display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:border-color .15s;margin-bottom:9px}
+  .ax-overview-item:hover{border-color:var(--border-active)}
+  .ax-item-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+  .ax-item-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
+  .ax-item-desc{font-size:11px;color:var(--muted);line-height:1.45}
+  /* legend */
+  .legend{display:flex;gap:18px;margin-bottom:20px;flex-wrap:wrap}
+  .leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+  .leg-dot{width:7px;height:7px;border-radius:50%}
+  /* pdf modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--bg2);border:1px solid var(--border-active);border-radius:12px;width:min(92vw,900px);height:min(90vh,860px);display:flex;flex-direction:column;overflow:hidden}
+  .modal-hdr{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+  .modal-title{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px}
+  .modal-page{font-size:11px;color:var(--muted);font-weight:400}
+  .modal-actions{display:flex;align-items:center;gap:7px}
+  .modal-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:5px 11px;border-radius:5px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:5px;transition:all .15s}
+  .modal-btn:hover{border-color:var(--border-active);color:var(--text)}
+  .modal-btn.ac{border-color:rgba(200,240,78,.3);background:rgba(200,240,78,.06);color:var(--accent)}
+  .modal-btn.ac:hover{background:rgba(200,240,78,.12)}
+  .modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;line-height:1;padding:2px 5px;border-radius:4px;transition:color .15s}
+  .modal-close:hover{color:var(--text)}
+  .modal-note{padding:9px 18px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);background:rgba(200,240,78,.04);flex-shrink:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .modal-note a{color:var(--accent);text-decoration:none;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500}
+  .modal-note a:hover{text-decoration:underline}
+  .modal-note code{font-family:'IBM Plex Mono',monospace;color:var(--accent)}
+  .modal-body{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .modal-body iframe{flex:1;border:none;width:100%;height:100%;background:#fff}
+  .modal-fallback{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:36px;text-align:center}
+  .modal-fallback .fi{font-size:44px;opacity:.3}
+  .modal-fallback h3{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500}
+  .modal-fallback p{font-size:12px;color:var(--muted);max-width:400px;line-height:1.6}
+  .modal-fallback .btn-open{display:inline-flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;padding:9px 18px;border-radius:7px;border:1px solid rgba(200,240,78,.35);background:rgba(200,240,78,.08);color:var(--accent);cursor:pointer;text-decoration:none;transition:all .15s}
+  .modal-fallback .btn-open:hover{background:rgba(200,240,78,.16)}
+  .tab-view{display:none}
+  .tab-view.active{display:block}
+  /* ── FLOWCHART DECISIONALE ── */
+  .flow-container{padding:36px 40px;max-width:900px;margin:0 auto}
+  .flow-intro{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:28px;padding:16px 20px;border:1px solid var(--border);border-radius:8px;background:var(--bg3)}
+  .flow-step{margin-bottom:0}
+  .flow-question{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin-bottom:0;position:relative}
+  .flow-q-label{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .flow-q-text{font-size:14px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:14px}
+  .flow-choices{display:flex;gap:10px;flex-wrap:wrap}
+  .flow-choice{padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .18s;white-space:nowrap}
+  .flow-choice:hover{border-color:var(--border-active);color:var(--text)}
+  .flow-choice.selected{border-color:var(--accent);background:rgba(200,240,78,.08);color:var(--accent)}
+  .flow-connector{width:2px;height:20px;background:var(--border);margin:0 0 0 22px}
+  .flow-result{background:var(--bg3);border:1px solid rgba(200,240,78,.25);border-radius:10px;padding:20px 22px;margin-top:0}
+  .flow-result-label{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .flow-result-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:10px}
+  .flow-result-techs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+  .flow-tech-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;transition:all .15s}
+  .flow-tech-badge:hover{border-color:var(--border-active)}
+  .flow-tech-badge .pdf-badge{font-size:9px;padding:2px 5px}
+  .flow-result-why{font-size:12px;color:var(--muted);line-height:1.6}
+  .flow-reset{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:6px 14px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;margin-top:16px;display:inline-flex;align-items:center;gap:6px}
+  .flow-reset:hover{border-color:var(--border-active);color:var(--text)}
+  .flow-progress{display:flex;gap:5px;margin-bottom:24px;flex-wrap:wrap;align-items:center}
+  .flow-progress-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .2s}
+  .flow-progress-dot.done{background:var(--accent)}
+  .flow-progress-dot.current{background:var(--accent2)}
+  /* ── COMPATIBILITÀ ── */
+  .compat-container{padding:36px 40px}
+  .compat-intro{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:28px;padding:16px 20px;border:1px solid var(--border);border-radius:8px;background:var(--bg3)}
+  .compat-section{margin-bottom:32px}
+  .compat-section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .compat-section-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .compat-section-title{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+  .compat-section-desc{font-size:12px;color:var(--muted);margin-left:20px;margin-bottom:12px;line-height:1.6}
+  .compat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:11px}
+  .compat-card{border:1px solid var(--border);border-radius:9px;padding:14px;background:var(--bg3);transition:border-color .15s}
+  .compat-card:hover{border-color:var(--border-active)}
+  .compat-card-techs{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+  .compat-tech-name{font-size:11px;font-weight:500;color:var(--text);padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;transition:all .15s}
+  .compat-tech-name:hover{border-color:var(--border-active)}
+  .compat-op{font-size:14px;color:var(--muted);font-weight:300}
+  .compat-card-verdict{font-size:11px;font-weight:500;margin-bottom:6px}
+  .compat-card-why{font-size:11px;color:var(--muted);line-height:1.5}
+  .compat-v-syn{color:#4ecdf0}.compat-v-red{color:#c8f04e}.compat-v-con{color:#f07c4e}.compat-v-neu{color:#7a7870}
+  /* ── PROFILO DI COSTO ── */
+  .cost-container{padding:36px 40px}
+  .cost-intro{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:28px;padding:16px 20px;border:1px solid var(--border);border-radius:8px;background:var(--bg3)}
+  .cost-legend{display:flex;gap:20px;margin-bottom:24px;flex-wrap:wrap}
+  .cost-leg-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}
+  .cost-leg-dot{width:8px;height:8px;border-radius:2px}
+  .cost-table{width:100%;border-collapse:collapse;font-size:12px}
+  .cost-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;background:var(--bg2);position:sticky;top:0}
+  .cost-table th:first-child{min-width:200px}
+  .cost-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+  .cost-table tr:hover td{background:rgba(255,255,255,.025)}
+  .cost-tech-name{font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:color .15s;display:flex;align-items:center;gap:7px}
+  .cost-tech-name:hover{color:var(--accent)}
+  .cost-bar-wrap{display:flex;align-items:center;gap:8px}
+  .cost-bar{height:6px;border-radius:3px;min-width:4px;transition:width .3s}
+  .cost-bar-val{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);white-space:nowrap}
+  .cost-note{font-size:11px;color:var(--muted);line-height:1.5;max-width:220px}
+  .cost-bar-index{background:#4ecdf0}
+  .cost-bar-query{background:#f07c4e}
+  .cost-bar-infra{background:#bc8cf0}
+  .cost-group-row td{background:var(--bg2);font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:10px 12px 6px}
+  .cost-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+  .cost-sort-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:4px;padding:0;transition:color .15s}
+  .cost-sort-btn:hover{color:var(--text)}
+  .cost-sort-btn.active{color:var(--accent)}
+  .cost-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .cost-filter{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:5px 12px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer;transition:all .15s}
+  .cost-filter.active{border-color:var(--accent);color:var(--accent);background:rgba(200,240,78,.06)}
+  .cost-filter:hover:not(.active){color:var(--text)}
+  /* ── AUTHOR ── */
+  .author-line{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .author-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--accent2);text-decoration:none;transition:opacity .15s}
+  .author-link:hover{opacity:.75}
+  .author-sep{color:var(--border-active);font-size:14px}
+  .author-source{font-size:12px;color:var(--muted)}
+  .author-source em{font-style:normal;color:var(--text)}
+  /* ── FOOTER ── */
+  footer{border-top:1px solid var(--border);padding:20px 40px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--bg2)}
+  .footer-left{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .footer-right{display:flex;align-items:center;gap:12px}
+  .footer-link{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.5px;color:var(--muted);text-decoration:none;padding:5px 11px;border-radius:5px;border:1px solid var(--border);transition:all .15s}
+  .footer-link:hover{border-color:var(--border-active);color:var(--text)}
+  .footer-link.accent{border-color:rgba(200,240,78,.3);color:var(--accent);background:rgba(200,240,78,.05)}
+  .footer-link.accent:hover{background:rgba(200,240,78,.1)}
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+  @media(max-width:768px){.content-area{grid-template-columns:1fr}.left-panel{max-height:200px}header,.right-panel,.flow-container,.compat-container,.cost-container{padding:20px}.nav-tabs{padding:0 10px}.nav-tab{padding:11px 10px;font-size:10px}.modal{width:98vw;height:95vh;border-radius:8px}}
+</style>
+</head>
+<body>
+
+<!-- PDF MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closePdf(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <div class="modal-title">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        RAG Techniques Catalog
+        <span class="modal-page" id="modal-page-info"></span>
+      </div>
+      <div class="modal-actions">
+        <a id="modal-open-link" class="modal-btn ac" href="#" target="_blank">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Apri
+        </a>
+        <a id="modal-dl-link" class="modal-btn" href="#" download="RAG_Techniques_Catalog.pdf">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Scarica
+        </a>
+        <button class="modal-close" onclick="closePdf()">✕</button>
+      </div>
+    </div>
+    <div class="modal-note" id="modal-note"></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <h1>RAG Techniques Taxonomy</h1>
+    <p>40 tecniche in 5 tassonomie: assi tecnici, use case, flowchart decisionale, compatibilità, profilo di costo. Clicca <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:10px;background:rgba(200,240,78,.08);border:1px solid rgba(200,240,78,.2);padding:1px 6px;border-radius:3px">#N p.X</span> su qualsiasi tecnica per aprire la scheda PDF.</p>
+    <div class="author-line">
+      <span>Tassonomie di</span>
+      <a href="https://www.linkedin.com/in/fcollova/" target="_blank" class="author-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        Francesco Collovà
+      </a>
+      <span class="author-sep">·</span>
+      <span class="author-source">Basato su <em>RAG Techniques Catalog v2.0</em> (2025)</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge">40 tecniche</span>
+    <span class="badge">5 tassonomie</span>
+    <a id="hdr-dl" class="btn-dl" href="#" onclick="handleDl(event)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Scarica PDF
+    </a>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('axes',event)">Per assi</button>
+  <button class="nav-tab" onclick="switchTab('uc',event)">Per use case</button>
+  <button class="nav-tab" onclick="switchTab('flow',event)">Flowchart decisionale</button>
+  <button class="nav-tab" onclick="switchTab('compat',event)">Compatibilità</button>
+  <button class="nav-tab" onclick="switchTab('cost',event)">Profilo di costo</button>
+</div>
+
+<div class="tab-view active" id="tab-axes">
+  <div class="content-area">
+    <div class="left-panel"><div class="sec-hdr">4 assi di classificazione</div><div id="ax-nav"></div></div>
+    <div class="right-panel" id="ax-detail">
+      <div class="empty"><div class="arr">←</div><div>Seleziona un asse o una categoria</div><div class="hint">// clicca #N p.X su ogni tecnica per aprire la scheda PDF</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-view" id="tab-uc">
+  <div class="content-area">
+    <div class="left-panel"><div class="sec-hdr">8 use case / tipologie corpus</div><div id="uc-nav"></div></div>
+    <div class="right-panel" id="uc-detail">
+      <div class="empty"><div class="arr">←</div><div>Seleziona un use case</div><div class="hint">// per vedere le tecniche consigliate</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: FLOWCHART DECISIONALE -->
+<div class="tab-view" id="tab-flow">
+  <div class="flow-container" id="flow-container"></div>
+</div>
+
+<!-- TAB 4: COMPATIBILITÀ -->
+<div class="tab-view" id="tab-compat">
+  <div class="compat-container" id="compat-container"></div>
+</div>
+
+<!-- TAB 5: PROFILO DI COSTO -->
+<div class="tab-view" id="tab-cost">
+  <div class="cost-container" id="cost-container"></div>
+</div>
+
+<script>
+/* ─── CONFIG ─────────────────────────────────────────────
+   Imposta PDF_URL con il link diretto al tuo PDF.
+   Esempi validi:
+     Google Drive (export diretto):
+       https://drive.google.com/uc?export=download&id=FILE_ID
+     GitHub Raw:
+       https://raw.githubusercontent.com/USER/REPO/main/RAG.pdf
+     jsDelivr (da GitHub release):
+       https://cdn.jsdelivr.net/gh/USER/REPO@main/RAG.pdf
+   
+   Per visualizzare la pagina esatta nel viewer integrato,
+   il link viene completato con #page=N (funziona con
+   Google Drive viewer e la maggior parte dei PDF server).
+──────────────────────────────────────────────────────── */
+const PDF_URL = "YOUR_PDF_URL_HERE";
+
+function pdfPageUrl(page) {
+  if (!PDF_URL || PDF_URL === "YOUR_PDF_URL_HERE") return null;
+  return PDF_URL + "#page=" + page;
+}
+
+/* ─── TECH MAP: nome → {num, page} ─── */
+const TM = {
+  "Basic RAG":{n:1,p:3},"Reliable RAG":{n:2,p:4},"Optimizing Chunk Sizes":{n:3,p:5},
+  "Proposition Chunking":{n:4,p:6},"Document Augmentation":{n:5,p:7},
+  "RAG with CSV / Structured Data":{n:6,p:8},"Query Transformations":{n:7,p:9},
+  "HyDE":{n:8,p:10},"HyPE":{n:9,p:11},"Step-Back Prompting":{n:10,p:12},
+  "Multi-Query Retrieval":{n:11,p:13},"Query Routing":{n:12,p:14},
+  "Contextual Chunk Headers":{n:13,p:15},"Semantic Chunking":{n:14,p:16},
+  "Context Window Enhancement":{n:15,p:17},"Relevant Segment Extraction":{n:16,p:18},
+  "Contextual Compression":{n:17,p:19},"Document Hierarchy":{n:18,p:20},
+  "Late Chunking":{n:19,p:21},"Fusion Retrieval":{n:20,p:22},
+  "Reranking":{n:21,p:23},"Multi-faceted Filtering":{n:22,p:24},
+  "Hierarchical Indices":{n:23,p:25},"Ensemble Retrieval":{n:24,p:26},
+  "Dartboard / MMR":{n:25,p:27},"Multi-modal RAG":{n:26,p:28},
+  "ColBERT / Token-level":{n:27,p:29},"Iterative Retrieval":{n:28,p:30},
+  "Adaptive Retrieval":{n:29,p:31},"Retrieval with Feedback Loop":{n:30,p:32},
+  "FLARE":{n:31,p:33},"Agentic RAG":{n:32,p:34},"Self-RAG":{n:33,p:35},
+  "Corrective RAG (CRAG)":{n:34,p:36},"Graph RAG":{n:35,p:37},
+  "Microsoft GraphRAG":{n:36,p:38},"RAPTOR":{n:37,p:39},
+  "Sophisticated Controllable Agent":{n:38,p:40},
+  "DeepEval":{n:39,p:42},"Explainable Retrieval":{n:40,p:43}
+};
+
+/* badge HTML */
+function badge(name){
+  const t=TM[name];if(!t)return '';
+  const es=name.replace(/'/g,"\\'");
+  return `<span class="pdf-badge" onclick="openPdf('${es}')">`+
+    `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`+
+    `#${t.n} p.${t.p}</span>`;
+}
+
+/* ─── PDF MODAL ─── */
+function openPdf(name){
+  const t=TM[name];if(!t)return;
+  const url=pdfPageUrl(t.p);
+  const overlay=document.getElementById('modal-overlay');
+  document.getElementById('modal-page-info').textContent=`Scheda #${t.n} — pagina ${t.p}`;
+  document.getElementById('modal-dl-link').href=PDF_URL!=="YOUR_PDF_URL_HERE"?PDF_URL:'#';
+  document.getElementById('modal-open-link').href=url||'#';
+  const note=document.getElementById('modal-note');
+  const body=document.getElementById('modal-body');
+  if(!url){
+    note.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> PDF non configurato. Modifica la variabile <code>PDF_URL</code> nello script con il link al tuo file.`;
+    body.innerHTML=`<div class="modal-fallback"><div class="fi">📄</div><h3>Scheda #${t.n} — ${name}</h3><p>Imposta <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent)">PDF_URL</code> nello script (in cima alla sezione &lt;script&gt;) con l'URL diretto al PDF su Google Drive, GitHub o altro hosting.</p></div>`;
+  } else {
+    note.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Scheda <strong style="color:var(--text)">#${t.n} ${name}</strong> · pagina ${t.p} &nbsp;·&nbsp; <a href="${url}" target="_blank">Apri in nuova finestra →</a>`;
+    body.innerHTML=`<iframe src="${url}" title="Scheda #${t.n} ${name}"></iframe>`;
+  }
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePdf(e){
+  if(e&&e.target!==document.getElementById('modal-overlay'))return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePdf()});
+function handleDl(e){
+  if(!PDF_URL||PDF_URL==="YOUR_PDF_URL_HERE"){e.preventDefault();alert('Configura PDF_URL nello script per abilitare il download.');}
+}
+document.getElementById('hdr-dl').href=PDF_URL!=="YOUR_PDF_URL_HERE"?PDF_URL:'#';
+
+/* ─── TECH DESCRIPTIONS ─── */
+const TD={
+  "Basic RAG":"Pipeline base: query → embedding → top-k retrieval → prompt augmentation → risposta. Baseline obbligatorio da ottimizzare prima di aggiungere complessità. I parametri chiave: dimensione chunk, k, e modello di embedding.",
+  "Reliable RAG":"Doppio layer di validazione: (1) relevance check — il contesto è rilevante? Se no, riscrive la query. (2) grounding check — la risposta è supportata dal contesto? Se no, raffina il draft. Massimo 2 iterazioni per evitare loop.",
+  "Optimizing Chunk Sizes":"Grid search offline su dimensioni chunk (256–1200 token) e overlap (0–15%) valutata su golden dataset con RAGAS. La configurazione ottimale varia significativamente per tipo di corpus.",
+  "Proposition Chunking":"Estrae via LLM proposizioni fattuali atomiche: affermazioni singole e verificabili. Ogni proposizione indicizzata separatamente con riferimento al documento. Alta precision, costo elevato a index-time.",
+  "Document Augmentation":"Genera 3–5 domande sintetiche per ogni chunk a index-time — l'inverso di HyDE. Aumenta il recall su phrasing colloquiale senza modificare la strategia di retrieval a runtime.",
+  "RAG with CSV / Structured Data":"Ogni riga CSV serializzata in 'campo: valore' e indicizzata con metadati strutturati (row_id, colonne). Filtri per metadati a runtime. Per aggregazioni complesse, Text-to-SQL è superiore.",
+  "Query Transformations":"Genera 2–3 riformulazioni fedeli + decompone in sotto-domande. Retrieval separato per ogni variante, deduplicazione per chunk ID. Migliora il recall su query vaghe senza modificare il corpus.",
+  "HyDE":"Genera un documento ipotetico che risponderebbe alla query, poi usa il suo embedding per la ricerca. La distanza documento-documento è molto più piccola della distanza query-documento.",
+  "HyPE":"Genera istruzioni task-oriented ('Trovare documentazione su X', 'Confrontare Y e Z') e le usa come embedding. Seleziona documenti adatti al tipo di task richiesto.",
+  "Step-Back Prompting":"Riformula la query a livello di astrazione più alto prima del retrieval. Retrieval su entrambe: query astratta (background context) e query originale (specific context). Contesti fusi per la risposta finale.",
+  "Multi-Query Retrieval":"Genera N varianti della query da angolazioni diverse (3–5). Retrieval parallelo per ogni variante. Aggregazione con RRF, deduplicazione per chunk ID. Massimizza la copertura semantica.",
+  "Query Routing":"Classifica ogni query per intent (lookup, policy, troubleshoot, calcolo) e la instrada al retriever ottimale. Riduce i costi per query semplici, migliora qualità per query specializzate.",
+  "Contextual Chunk Headers":"Prepone a ogni chunk un header '[Titolo > Sezione]' prima dell'embedding. Riduce l'ambiguità dei chunk isolati. Proposta da Anthropic (Contextual Retrieval). Overhead token 10–20%.",
+  "Semantic Chunking":"Divide il testo identificando confini dove il topic cambia: misura cosine similarity tra frasi adiacenti, inserisce boundary dove similarity < 0.75. Chunk semanticamente coerenti ma di dimensione variabile.",
+  "Context Window Enhancement":"Aggiunge automaticamente i chunk adiacenti (pos±w) al chunk recuperato. Deduplica e riordina per posizione originale. Ripristina la coerenza locale senza modificare la strategia di retrieval.",
+  "Relevant Segment Extraction":"Un LLM extractor identifica e restituisce solo gli span minimali che supportano la risposta. Massimizza il signal-to-noise. Estrae span originali (diverso da Compression che genera nuovo testo).",
+  "Contextual Compression":"Comprime ogni chunk recuperato in un sommario focalizzato sulla query specifica (20–40% dell'originale). Permette di includere più chunk nello stesso context window.",
+  "Document Hierarchy":"Small-to-Big retrieval: index-time chunking a due livelli (figli piccoli ~300t, genitori grandi ~1500t). Ricerca sui figli (alta precision), contesto restituito è il genitore (alta coerenza).",
+  "Late Chunking":"Encoding dell'intero documento con long-context model prima del chunking, poi mean pooling degli embedding token per ogni chunk. Ogni chunk embedding incorpora il contesto dell'intero documento.",
+  "Fusion Retrieval":"Mantiene vector DB (dense) e indice BM25 (sparse) in parallelo. RRF combina le due ranked list: score = Σ 1/(60+rank). BM25 essenziale per terminologia tecnica e codici errore.",
+  "Reranking":"Pipeline a due stadi: bi-encoder → 20–50 candidati (veloce); cross-encoder → score per coppia (query, chunk) (preciso). Tipico guadagno: +10–20% MRR.",
+  "Multi-faceted Filtering":"Indicizza documenti con metadati ricchi (tenant, ruolo, data). A runtime costruisce where-clause dal contesto utente. Fondamentale per sistemi enterprise multi-tenant con requisiti ACL.",
+  "Hierarchical Indices":"Tre indici separati: document (summary), section (filtrato per doc_id), chunk (filtrato per section_id). Retrieval progressivo coarse→fine. Scala su corpus di grandi dimensioni.",
+  "Ensemble Retrieval":"Combina più retriever eterogenei (dense, BM25, domain-specific) con aggregazione RRF o weighted merge. Modulare: retriever aggiungibili senza modificare la pipeline.",
+  "Dartboard / MMR":"Maximum Marginal Relevance: argmax[λ·sim(q,d) − (1−λ)·max_j sim(d,d_j)]. λ=0.5 bilancia rilevanza e diversità. Riduce la ridondanza nel contesto per query broad.",
+  "Multi-modal RAG":"Estrae immagini dai documenti e genera caption con vision model (GPT-4o, LLaVA). Le caption vengono indicizzate come testo normale. Qualità del retrieval bounded dalla qualità del captioning.",
+  "ColBERT / Token-level":"Mantiene embedding a livello di token. Rilevanza calcolata come MaxSim: Σ_i max_j E_i·E_j. Più preciso di bi-encoder, più veloce di cross-encoder. Elevato storage. Implementato con RAGatouille.",
+  "Iterative Retrieval":"Multiple round di retrieval. Dopo ogni round un LLM valuta se l'evidenza è sufficiente o propone una follow-up query. Contesto accumulato. Max 3 round. Ideale per domande multi-hop.",
+  "Adaptive Retrieval":"Classifica ogni query per intent e instrada alla strategia ottimale (ACL search per policy, hybrid per troubleshoot, simple per definizioni). Riduce i costi per query semplici.",
+  "Retrieval with Feedback Loop":"Logga ogni interazione e periodicamente fine-tuna il reranker sui feedback utente. Il sistema migliora continuamente in produzione, allineandosi all'intent reale degli utenti.",
+  "FLARE":"Forward-Looking Active REtrieval. Monitora P(token) durante la generazione. Dove P < soglia (es. 0.5), usa i token generati come query per un retrieval attivo. Richiede accesso ai logprobs.",
+  "Agentic RAG":"Un LLM agent sceglie autonomamente quale tool di retrieval usare, in quale ordine e quante volte (chunk, full-doc, web, API). Architettura più flessibile ma più costosa da gestire e debuggare.",
+  "Self-RAG":"LLM fine-tuned con token speciali [Retrieve], [IsRel], [IsSup], [IsUse]. Tutto in un unico modello senza LLM call esterne. Richiede fine-tuning — non plug-and-play.",
+  "Corrective RAG (CRAG)":"Dopo ogni retrieval, LLM evaluator assegna score 0–1. Score > 0.7: procede. Score < 0.3: rewrite + fallback (web search). Score 0.3–0.7: merge contesto originale + corretto.",
+  "Graph RAG":"NER sulla query → entità seed → traversata del knowledge graph a 2 hop → vector search limitata ai chunk delle entità trovate. Forte su domande multi-hop e relazionali.",
+  "Microsoft GraphRAG":"Estende Graph RAG con community summaries pre-calcolati (Leiden algorithm). Domande globali → community summaries; domande locali → vector search + graph. Preprocessing pesante, runtime leggero.",
+  "RAPTOR":"Albero di summary ricorsivi: chunk foglia → GMM clustering → summary per cluster → ricorsivo. Retrieval a qualsiasi livello dell'albero: dettaglio (foglie) o visione d'insieme (radice).",
+  "Sophisticated Controllable Agent":"Planner LLM decompone la query in sub-task con retrieval query esplicite. Per ogni sub-task: retrieve → genera → verifica. Se il verifier rifiuta, riscrive e riprova. Più auditabile degli agenti free-form.",
+  "DeepEval":"Framework per valutazione automatica: Faithfulness, Answer Relevancy, Contextual Precision/Recall. Integrazione con pytest per CI/CD. Richiede golden dataset — il vero investimento.",
+  "Explainable Retrieval":"Ogni risposta accompagnata da: chunk sorgente con similarity score, spiegazione del perché il chunk è stato recuperato, span specifici che supportano ogni affermazione. Citazioni cliccabili nell'UI."
+};
+
+/* ─── AXES DATA ─── */
+const AXES=[
+  {id:"ax1",label:"Asse 1 — Dove agisce",color:"#4ecdf0",
+   desc:"Ogni tecnica RAG interviene in uno o più slot precisi della pipeline. Conoscere il punto di intervento è essenziale per comprendere i trade-off di latenza, costo e qualità.",
+   body:"La pipeline RAG ha 5 slot: index-time, query-time, retrieval, post-retrieval e generazione. Le tecniche base agiscono a index-time (una tantum). Le tecniche di Query Enhancement agiscono a query-time aggiungendo 1–2 LLM call per richiesta. Le tecniche di retrieval avanzato intervengono durante la ricerca. Post-retrieval raccoglie Reranking, Compression e Filtering. FLARE e Self-RAG intervengono durante la generazione stessa.",
+   items:[
+    {name:"Index-time",color:"#4ecdf0",desc:"Costo upfront, nessun overhead a runtime. Eseguito una tantum o ad ogni aggiornamento del corpus.",
+     techs:["Optimizing Chunk Sizes","Proposition Chunking","Document Augmentation","Contextual Chunk Headers","Semantic Chunking","Late Chunking","RAG with CSV / Structured Data"]},
+    {name:"Query-time",color:"#4ecdf0",desc:"Trasformazione della query prima del retrieval. Aggiunge 1–2 LLM call per ogni richiesta utente.",
+     techs:["Query Transformations","HyDE","HyPE","Step-Back Prompting","Multi-Query Retrieval","Query Routing"]},
+    {name:"Retrieval",color:"#4ecdf0",desc:"La ricerca nei vettori, nel grafo o negli indici sparsi. Influenza direttamente recall e precision.",
+     techs:["Basic RAG","Fusion Retrieval","Ensemble Retrieval","Dartboard / MMR","Multi-modal RAG","ColBERT / Token-level","Hierarchical Indices","Graph RAG"]},
+    {name:"Post-retrieval",color:"#4ecdf0",desc:"Filtro, riordino e compressione dei chunk già recuperati prima di passarli all'LLM.",
+     techs:["Reranking","Multi-faceted Filtering","Contextual Compression","Relevant Segment Extraction","Context Window Enhancement","Document Hierarchy"]},
+    {name:"Generazione",color:"#4ecdf0",desc:"Intervento durante o dopo la generazione: validation loop, token confidence, citazioni.",
+     techs:["Reliable RAG","FLARE","Self-RAG","Corrective RAG (CRAG)","Explainable Retrieval","Retrieval with Feedback Loop"]},
+  ]},
+  {id:"ax2",label:"Asse 2 — Complessità",color:"#c8f04e",
+   desc:"Il costo reale di adottare una tecnica: infrastruttura necessaria, costo LLM ricorrente, complessità di debugging in produzione.",
+   body:"★ Bassa: plug-in su pipeline esistente, qualche giorno. ★★ Media: nuovo componente (reranker, secondo indice, LLM call extra per ogni query), 1–2 settimane. ★★★ Alta: fine-tuning di modelli, costruzione di knowledge graph, preprocessing offline pesante, framework agentici completi con tracing e guardrail — mesi di lavoro.",
+   items:[
+    {name:"★ Bassa — giorni",color:"#c8f04e",desc:"Plug-in su pipeline esistente. Nessuna infrastruttura aggiuntiva.",
+     techs:["Basic RAG","Optimizing Chunk Sizes","Contextual Chunk Headers","RAG with CSV / Structured Data","Context Window Enhancement","Explainable Retrieval","DeepEval"]},
+    {name:"★★ Media — settimane",color:"#c8f04e",desc:"Nuovo componente (reranker, secondo indice, LLM call extra). Latenza aggiuntiva da misurare.",
+     techs:["Reliable RAG","Proposition Chunking","Document Augmentation","Semantic Chunking","HyDE","HyPE","Step-Back Prompting","Multi-Query Retrieval","Query Routing","Relevant Segment Extraction","Contextual Compression","Document Hierarchy","Late Chunking","Fusion Retrieval","Reranking","Multi-faceted Filtering","Dartboard / MMR","Adaptive Retrieval","Corrective RAG (CRAG)"]},
+    {name:"★★★ Alta — mesi",color:"#c8f04e",desc:"Infrastruttura dedicata, fine-tuning, preprocessing offline pesante, framework agentico.",
+     techs:["Hierarchical Indices","Ensemble Retrieval","Multi-modal RAG","ColBERT / Token-level","Iterative Retrieval","Retrieval with Feedback Loop","FLARE","Agentic RAG","Self-RAG","Graph RAG","Microsoft GraphRAG","RAPTOR","Sophisticated Controllable Agent","Query Transformations"]},
+  ]},
+  {id:"ax3",label:"Asse 3 — Cosa migliora",color:"#f07c4e",
+   desc:"Le 40 tecniche migliorano 4 metriche diverse e spesso in conflitto. Identificare il collo di bottiglia è il prerequisito per scegliere la tecnica giusta.",
+   body:"(1) Basso recall: il documento giusto non viene trovato. (2) Bassa precision: troppi chunk irrilevanti. (3) Bassa faithfulness: la risposta non è grounded. (4) Copertura insufficiente: la risposta è parziale. Confondere le patologie porta a ottimizzazioni inutili o controproducenti.",
+   items:[
+    {name:"Recall — trovare più documenti rilevanti",color:"#f07c4e",desc:"Il corpus contiene l'informazione ma il retrieval non la trova.",
+     techs:["Multi-Query Retrieval","Document Augmentation","Fusion Retrieval","HyDE","Step-Back Prompting","Ensemble Retrieval","Dartboard / MMR","Query Transformations"]},
+    {name:"Precision — meno rumore nel contesto",color:"#f07c4e",desc:"Il retrieval porta troppi chunk irrilevanti che diluiscono il segnale.",
+     techs:["Reranking","ColBERT / Token-level","Proposition Chunking","Multi-faceted Filtering","Contextual Compression","Relevant Segment Extraction","Document Hierarchy"]},
+    {name:"Faithfulness — risposta grounded",color:"#f07c4e",desc:"La risposta non è supportata dal contesto recuperato — allucinazione parziale.",
+     techs:["Reliable RAG","FLARE","Self-RAG","Corrective RAG (CRAG)","Retrieval with Feedback Loop","Explainable Retrieval"]},
+    {name:"Copertura — visione completa",color:"#f07c4e",desc:"La risposta è grounded ma incompleta — mancano aspetti o il contesto è frammentato.",
+     techs:["Iterative Retrieval","RAPTOR","Microsoft GraphRAG","Step-Back Prompting","Hierarchical Indices","Graph RAG"]},
+  ]},
+  {id:"ax4",label:"Asse 4 — Tipo di corpus",color:"#bc8cf0",
+   desc:"La natura del corpus è il vincolo architetturale primario. La stessa tecnica può essere ottimale per un tipo di dati e inadatta per un altro.",
+   body:"Quattro famiglie: testo narrativo libero (chunking semantico, embedding contestuali), dati strutturati (row serialization, metadata filters), corpus multimodale con immagini (vision captioning), knowledge base con relazioni dense tra entità (knowledge graph + traversata di nodi).",
+   items:[
+    {name:"Testo libero e narrativo",color:"#bc8cf0",desc:"PDF, manuali, paper, documentazione tecnica, policy.",
+     techs:["Semantic Chunking","Late Chunking","Context Window Enhancement","Contextual Chunk Headers","Document Hierarchy","Proposition Chunking","Document Augmentation"]},
+    {name:"Dati strutturati — tabelle, CSV, DB",color:"#bc8cf0",desc:"Export CSV, cataloghi prodotti, ticket, report con colonne tipizzate.",
+     techs:["RAG with CSV / Structured Data","Multi-faceted Filtering","Query Routing","Adaptive Retrieval"]},
+    {name:"Corpus multimodale — immagini, slide",color:"#bc8cf0",desc:"PDF con figure, presentazioni, manuali con diagrammi.",
+     techs:["Multi-modal RAG","Contextual Chunk Headers","Late Chunking","Relevant Segment Extraction","Agentic RAG"]},
+    {name:"Knowledge graph e KB relazionale",color:"#bc8cf0",desc:"Ontologie, dati biomedici, relazioni tra entità aziendali.",
+     techs:["Graph RAG","Microsoft GraphRAG","Proposition Chunking","RAPTOR","Iterative Retrieval","Sophisticated Controllable Agent"]},
+  ]},
+];
+
+/* ─── RENDER AXES NAV ─── */
+function renderAxNav(){
+  const nav=document.getElementById('ax-nav');
+  nav.innerHTML='';
+  AXES.forEach((ax,ai)=>{
+    const grp=document.createElement('div');grp.className='ax-group';
+    const hdr=document.createElement('div');hdr.className='ax-group-hdr';
+    hdr.innerHTML=`<span>${ax.label}</span><span class="chevron">▼</span>`;
+    hdr.onclick=()=>{
+      const it=grp.querySelector('.ax-items'),open=it.classList.toggle('open');
+      hdr.classList.toggle('open',open);if(open)showAx(ai,null);
+    };
+    const its=document.createElement('div');its.className='ax-items';
+    ax.items.forEach((it,ii)=>{
+      const el=document.createElement('div');el.className='ax-item';el.id=`axi-${ai}-${ii}`;
+      el.innerHTML=`<span class="dot" style="background:${ax.color}"></span>${it.name}`;
+      el.onclick=e=>{e.stopPropagation();document.querySelectorAll('.ax-item').forEach(x=>x.classList.remove('active'));el.classList.add('active');showAx(ai,ii);};
+      its.appendChild(el);
+    });
+    grp.appendChild(hdr);grp.appendChild(its);nav.appendChild(grp);
+  });
+}
+
+function showAx(ai,ii){
+  const ax=AXES[ai],det=document.getElementById('ax-detail');
+  if(ii===null){
+    det.innerHTML=`<div class="d-tag">Asse ${ai+1} di 4</div><div class="d-title">${ax.label}</div><div class="d-sub">${ax.desc}</div>
+      <div class="d-sec-title">Descrizione</div><div class="d-body">${ax.body}</div>
+      <div class="d-sec-title">Categorie in questo asse — clicca per espandere</div>
+      ${ax.items.map((it,ii)=>`<div class="ax-overview-item" onclick="selAx(${ai},${ii})">
+        <div class="ax-item-dot" style="background:${ax.color}"></div>
+        <div><div class="ax-item-name">${it.name}</div><div class="ax-item-desc">${it.desc}</div></div>
+      </div>`).join('')}`;
+  } else {
+    const it=ax.items[ii];
+    det.innerHTML=`<div class="d-tag">${ax.label}</div><div class="d-title">${it.name}</div><div class="d-sub">${it.desc}</div>
+      <div class="d-sec-title">Tecniche — clicca <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:10px;background:rgba(200,240,78,.08);border:1px solid rgba(200,240,78,.2);padding:1px 6px;border-radius:3px">#N p.X</span> per aprire la scheda nel PDF</div>
+      <div class="tech-grid">${it.techs.map(name=>`<div class="tech-card">
+        <div class="tech-card-hdr"><div class="tech-card-name">${name}</div>${badge(name)}</div>
+        <div class="tech-card-desc">${TD[name]||''}</div>
+      </div>`).join('')}</div>`;
+  }
+}
+
+function selAx(ai,ii){
+  const grp=document.querySelectorAll('.ax-group')[ai];
+  const its=grp.querySelector('.ax-items'),hdr=grp.querySelector('.ax-group-hdr');
+  its.classList.add('open');hdr.classList.add('open');
+  document.querySelectorAll('.ax-item').forEach(x=>x.classList.remove('active'));
+  const el=document.getElementById(`axi-${ai}-${ii}`);if(el)el.classList.add('active');
+  showAx(ai,ii);
+}
+
+/* ─── USE CASES DATA ─── */
+const UCS=[
+  {id:"qa",icon:"📄",label:"Q&A su knowledge base",sub:"Documenti aziendali, FAQ, policy",
+   title:"Q&A su knowledge base aziendale e documentazione",tag:"Use case — Testo strutturato",
+   desc:"Corpus di manuali, policy, FAQ, PDF strutturati. L'utente fa domande fattuali. Priorità: alta precision, citazioni verificabili, bassa latenza.",
+   body:"Il caso RAG più comune in ambito enterprise. Il corpus è relativamente stabile e le query sono fattuali. Il rischio principale è il false positive: restituire informazioni parzialmente corrette senza che l'utente possa verificarle. Reranking e Explainable Retrieval non sono opzionali. La pipeline ottimale inizia con una valutazione offline del chunking, aggiunge Fusion Retrieval per gestire sia query semantiche che ricerche per termine esatto, e usa Reranking per massimizzare la precision.",
+   cards:[{name:"Basic RAG",t:"core",why:"Baseline obbligatorio. Top-k retrieval su embedding vettoriale."},{name:"Optimizing Chunk Sizes",t:"core",why:"Il parametro più impattante prima di qualsiasi altra tecnica."},{name:"Contextual Chunk Headers",t:"core",why:"Riduce l'ambiguità dei chunk isolati nei PDF strutturati."},{name:"Reranking",t:"boost",why:"+10–20% MRR con cross-encoder su 20–50 candidati."},{name:"Fusion Retrieval",t:"boost",why:"BM25 + dense: cattura sia termini esatti che semantica."},{name:"Reliable RAG",t:"boost",why:"Double-check su relevance e grounding prima di rispondere."},{name:"Document Hierarchy",t:"boost",why:"Cerca sul chunk piccolo, restituisce il genitore come contesto."},{name:"Explainable Retrieval",t:"adv",why:"Citazioni cliccabili e span evidenziati per audit trail."},{name:"DeepEval",t:"adv",why:"Metriche CI per proteggere da regressioni a ogni deploy."}]},
+  {id:"legal",icon:"⚖️",label:"Legale / Medicale / Finance",sub:"Alto rischio, zero allucinazioni",
+   title:"Dominio ad alto rischio: legale, medicale, finance",tag:"Use case — Alta affidabilità",
+   desc:"Allucinazioni inaccettabili. Ogni affermazione deve essere grounded e tracciabile. La latenza è secondaria rispetto alla correttezza.",
+   body:"In questi domini un'allucinazione è un rischio operativo o legale reale. Il sistema deve includere verifica automatica: Reliable RAG e grounding check sono obbligatori, Explainable Retrieval è un requisito, non un'opzione. Proposition Chunking trasforma ogni unità di recupero in un'affermazione atomica verificabile. Multi-faceted Filtering garantisce che ogni utente veda solo i documenti a cui ha accesso.",
+   cards:[{name:"Reliable RAG",t:"core",why:"Double-check su relevance + grounding prima di rispondere."},{name:"Proposition Chunking",t:"core",why:"Ogni chunk = un fatto atomico verificabile."},{name:"Reranking",t:"core",why:"Precision massima: solo i candidati più forti all'LLM."},{name:"Explainable Retrieval",t:"core",why:"Audit trail completo con span citati per ogni affermazione."},{name:"Corrective RAG (CRAG)",t:"boost",why:"Recovery automatico se la qualità del retrieval è sotto soglia."},{name:"Multi-faceted Filtering",t:"boost",why:"ACL per tenant, ruolo e accesso ai documenti riservati."},{name:"Relevant Segment Extraction",t:"boost",why:"Solo gli span minimali che supportano la risposta."},{name:"Self-RAG",t:"adv",why:"Il modello decide autonomamente se il grounding è sufficiente."},{name:"DeepEval",t:"adv",why:"Faithfulness metric come hard gate nel CI/CD."}]},
+  {id:"ent",icon:"🏢",label:"Enterprise multi-tenant",sub:"Fonti eterogenee, utenti multipli",
+   title:"Assistente enterprise con utenti multipli e fonti eterogenee",tag:"Use case — Scalabilità e routing",
+   desc:"Multi-tenant, dati strutturati + non strutturati, query di tipo diverso. Bilanciare costo e qualità.",
+   body:"Non esiste una strategia di retrieval unica ottimale per tutti i tipi di query. Query Routing è l'architettura che abilita questa flessibilità senza esporre la complessità all'utente finale. Multi-faceted Filtering garantisce la separazione dei dati tra tenant. Adaptive Retrieval ottimizza il costo usando strategie leggere per query semplici e pesanti per quelle complesse.",
+   cards:[{name:"Query Routing",t:"core",why:"Smista ogni query al retriever ottimale in base all'intent."},{name:"Multi-faceted Filtering",t:"core",why:"ACL per tenant, ruolo, prodotto: compliance by design."},{name:"Fusion Retrieval",t:"core",why:"BM25 + dense: essenziale per corpora con terminologia mista."},{name:"Adaptive Retrieval",t:"boost",why:"Strategia ottimale per tipo di query → costo ridotto."},{name:"Ensemble Retrieval",t:"boost",why:"Pool di retriever eterogenei con RRF."},{name:"RAG with CSV / Structured Data",t:"boost",why:"Row-wise indexing per cataloghi, ticket, dati tabulari."},{name:"Retrieval with Feedback Loop",t:"boost",why:"Fine-tuning continuo dal feedback implicito degli utenti."},{name:"Hierarchical Indices",t:"adv",why:"Scala su corpus grandi con retrieval progressivo."},{name:"Agentic RAG",t:"adv",why:"Tool selection autonoma per task complessi multi-step."}]},
+  {id:"code",icon:"💻",label:"Codebase / Tech docs",sub:"Log, codici errore, API reference",
+   title:"Q&A su codebase, log, documentazione tecnica",tag:"Use case — Terminologia esatta",
+   desc:"Query con termini esatti (nomi funzioni, codici errore, stack trace). Il match semantico da solo è insufficiente.",
+   body:"Il corpus tecnico richiede match esatto: 'AuthenticationError 403' e 'errore di autenticazione' non sono equivalenti. BM25 è indispensabile, non opzionale. Context Window Enhancement è utile perché i chunk di codice sono spesso incompleti senza il contesto circostante. ColBERT funziona bene su token tecnici perché il MaxSim cattura l'importanza di termini specifici.",
+   cards:[{name:"Fusion Retrieval",t:"core",why:"BM25 cattura nomi esatti, dense cattura la semantica."},{name:"Query Transformations",t:"core",why:"Decomposizione di query multi-step su codice."},{name:"Multi-faceted Filtering",t:"core",why:"Filtra per repo, versione, linguaggio, componente."},{name:"Reranking",t:"boost",why:"Cross-encoder su coppie (query, snippet di codice)."},{name:"ColBERT / Token-level",t:"boost",why:"MaxSim funziona bene su token tecnici specifici."},{name:"Context Window Enhancement",t:"boost",why:"Espande il chunk al file o alla funzione completa."},{name:"Iterative Retrieval",t:"adv",why:"Multi-hop per dipendenze tra moduli o stack trace."},{name:"Agentic RAG",t:"adv",why:"Combina ricerca su codice + esecuzione + ricerca web."}]},
+  {id:"sci",icon:"🔬",label:"Ricerca scientifica",sub:"Literature review, paper multi-hop",
+   title:"Literature review e ricerca scientifica",tag:"Use case — Profondità e connessioni",
+   desc:"Paper lunghi, terminologia specializzata, relazioni tra concetti distribuiti su più documenti.",
+   body:"La ricerca scientifica richiede due capacità quasi opposte: trovare un fatto specifico (alta precision) e avere la visione d'insieme di un campo (copertura tematica). RAPTOR è la tecnica che meglio bilancia queste esigenze costruendo un albero di summary ricorsivi. HyDE è efficace perché le query degli utenti sono molto più brevi e colloquiali del testo dei paper.",
+   cards:[{name:"HyDE",t:"core",why:"Riduce il mismatch tra query colloquiale e prosa tecnica."},{name:"Step-Back Prompting",t:"core",why:"Recupera il principio generale prima del dettaglio."},{name:"Semantic Chunking",t:"core",why:"Chunk coerenti su paper con sezioni eterogenee."},{name:"RAPTOR",t:"boost",why:"Albero di summary ricorsivi: visione d'insieme + dettaglio."},{name:"Graph RAG",t:"boost",why:"Relazioni tra entità: autori, dataset, metodi."},{name:"Multi-Query Retrieval",t:"boost",why:"Copre angolazioni diverse della stessa ipotesi."},{name:"Iterative Retrieval",t:"boost",why:"Triangolazione da più paper per risposte multi-hop."},{name:"Microsoft GraphRAG",t:"adv",why:"Community summaries per domande tematiche corpus-wide."},{name:"FLARE",t:"adv",why:"Active retrieval durante la generazione di review lunghe."}]},
+  {id:"mm",icon:"🖼️",label:"Corpus multimodale",sub:"PDF con figure, slide, diagrammi",
+   title:"Documenti con immagini, diagrammi, presentazioni",tag:"Use case — Vision + Text",
+   desc:"PDF con figure, presentazioni, manuali tecnici con screenshot.",
+   body:"Le immagini sono invisibili al retriever vettoriale standard. Multi-modal RAG risolve questo con il captioning: ogni immagine viene processata da un vision model che genera una descrizione testuale dettagliata indicizzata come chunk normale. La qualità del retrieval è bounded dalla qualità del captioning.",
+   cards:[{name:"Multi-modal RAG",t:"core",why:"Vision captioning: ogni immagine diventa testo indicizzabile."},{name:"Contextual Chunk Headers",t:"core",why:"Header con numero figura, sezione, titolo."},{name:"Relevant Segment Extraction",t:"boost",why:"Estrae solo i passaggi che referenziano le figure."},{name:"Reranking",t:"boost",why:"Cross-encoder su coppie (query, caption+testo)."},{name:"Late Chunking",t:"boost",why:"Embedding contestuali per testo intorno alle figure."},{name:"Agentic RAG",t:"adv",why:"Analisi diretta delle immagini con vision tool."}]},
+  {id:"conv",icon:"💬",label:"Assistente conversazionale",sub:"Query brevi, utenti non tecnici",
+   title:"Chatbot e assistenti conversazionali",tag:"Use case — Volume e varietà",
+   desc:"Query brevi e colloquiali, phrasing variabile, utenti non tecnici. Alto volume, latenza sensibile.",
+   body:"Il vocabolario dell'utente è quasi mai quello del corpus. Document Augmentation risolve questo a index-time generando domande sintetiche per ogni chunk. HyDE fa la stessa cosa a query-time. Contextual Compression riduce i token nel context window e quindi la latenza, critica per un'esperienza conversazionale fluida.",
+   cards:[{name:"Document Augmentation",t:"core",why:"Domande sintetiche a index-time aumentano recall colloquiale."},{name:"HyDE",t:"core",why:"Riduce mismatch tra query breve e testo lungo."},{name:"Query Transformations",t:"core",why:"Rewrite + decomposizione per query ambigue."},{name:"Multi-Query Retrieval",t:"boost",why:"N varianti in parallelo per query polisemiche."},{name:"Dartboard / MMR",t:"boost",why:"Diversità nel contesto per query broad."},{name:"Contextual Compression",t:"boost",why:"Riduce token nel context window → latenza inferiore."},{name:"Retrieval with Feedback Loop",t:"boost",why:"Fine-tuning continuo dal feedback implicito."},{name:"Adaptive Retrieval",t:"adv",why:"Strategia diversa per lookup vs domande aperte."}]},
+  {id:"graph",icon:"🕸️",label:"Knowledge graph / KB relazionale",sub:"Entità connesse, query multi-hop",
+   title:"Knowledge base con relazioni dense tra entità",tag:"Use case — Relazioni e grafi",
+   desc:"Ontologie, dati biomedici, knowledge graph aziendali. Le domande richiedono traversata di relazioni.",
+   body:"Il retrieval vettoriale non è progettato per rispondere a domande come 'quali farmaci interagiscono con l'enzima X e sono approvati in Europa?', dove la risposta richiede la traversata di tre tipi di relazione. Graph RAG risolve estraendo entità e relazioni dai testi a index-time e costruendo un knowledge graph esplicito.",
+   cards:[{name:"Graph RAG",t:"core",why:"Entity extraction + graph traversal 2 hop."},{name:"Proposition Chunking",t:"core",why:"Ogni proposizione = un arco del grafo."},{name:"Hierarchical Indices",t:"boost",why:"Retrieval coarse→fine su grafo gerarchico."},{name:"Microsoft GraphRAG",t:"boost",why:"Community summaries per query tematiche globali."},{name:"Iterative Retrieval",t:"boost",why:"Multi-hop iterativo per catene di relazioni."},{name:"Step-Back Prompting",t:"boost",why:"Recupera il concetto padre prima del nodo specifico."},{name:"RAPTOR",t:"adv",why:"Albero ricorsivo per sintesi di sottografi."},{name:"Sophisticated Controllable Agent",t:"adv",why:"Piano deterministico e auditabile per query multi-step."}]},
+];
+
+/* ─── RENDER UC NAV ─── */
+function renderUCNav(){
+  const nav=document.getElementById('uc-nav');nav.innerHTML='';
+  UCS.forEach((uc,i)=>{
+    const el=document.createElement('div');el.className='uc-item';el.id=`ucn-${uc.id}`;
+    el.innerHTML=`<div class="uc-icon">${uc.icon}</div><div><div class="uc-name">${uc.label}</div><div class="uc-sub">${uc.sub}</div></div>`;
+    el.onclick=()=>{document.querySelectorAll('.uc-item').forEach(x=>x.classList.remove('active'));el.classList.add('active');showUC(i);};
+    nav.appendChild(el);
+  });
+}
+
+function showUC(i){
+  const uc=UCS[i],det=document.getElementById('uc-detail');
+  const tLabel={core:'Core',boost:'Boost',adv:'Avanzato'};
+  det.innerHTML=`<div class="d-tag">${uc.tag}</div><div class="d-title">${uc.icon} ${uc.title}</div><div class="d-sub">${uc.desc}</div>
+    <div class="d-sec-title">Strategia consigliata</div><div class="d-body">${uc.body}</div>
+    <div class="d-sec-title">Tecniche raccomandate — clicca il badge per la scheda PDF</div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#4ecdf0"></div>Core — necessario</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#c8f04e"></div>Boost — alto ROI</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#bc8cf0"></div>Avanzato — per scale/qualità</div>
+    </div>
+    <div class="uc-tech-grid">${uc.cards.map(c=>`<div class="uc-tech-card">
+      <div class="uc-tech-top">
+        <div class="uc-tech-name">${c.name}</div>
+        <div class="uc-tech-badges">${badge(c.name)}<span class="tier-pill tier-${c.t}">${tLabel[c.t]}</span></div>
+      </div>
+      <div class="uc-tech-why">${c.why}</div>
+    </div>`).join('')}</div>`;
+}
+
+/* ─── TAB SWITCH ─── */
+function switchTab(tab,e){
+  document.querySelectorAll('.tab-view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(e&&e.target)e.target.classList.add('active');
+}
+
+/* ─── INIT MOVED TO END ─── */
+
+/* ══════════════════════════════════════════════
+   TAB 3: FLOWCHART DECISIONALE
+══════════════════════════════════════════════ */
+const FLOW_TREE = {
+  q:'Qual è il problema principale del tuo sistema RAG?',
+  hint:'Inizia identificando il sintomo più evidente.',
+  choices:[
+    {
+      label:'Non trova i documenti giusti',
+      next:{
+        q:'Il corpus ha terminologia tecnica specifica, codici errore o nomi propri critici?',
+        hint:'Pensa a query come "AuthenticationError 403" o nomi di funzioni.',
+        choices:[
+          {label:'Sì — terminologia esatta fondamentale', next:{
+            q:'Il corpus è aggiornato frequentemente (< 1 settimana)?',hint:'',
+            choices:[
+              {label:'Sì — aggiornamenti frequenti', result:{
+                title:'Recall su corpus tecnico dinamico',
+                techs:['Fusion Retrieval','Multi-Query Retrieval','Document Augmentation','Query Routing'],
+                why:'Fusion Retrieval (BM25+dense) è la tecnica con ROI più alto per terminologia esatta. Multi-Query espande la copertura su phrasing diversi. Document Augmentation aumenta il recall a index-time. Query Routing instrada a SQL/BM25 quando serve.'
+              }},
+              {label:'No — corpus stabile', result:{
+                title:'Recall su corpus tecnico stabile',
+                techs:['Fusion Retrieval','ColBERT / Token-level','Document Augmentation','Contextual Chunk Headers'],
+                why:'Stessa base di Fusion Retrieval, ma con corpus stabile puoi investire in ColBERT (token-level precision) e Document Augmentation a index-time senza preoccuparti del costo di reindicizzazione.'
+              }}
+            ]
+          }},
+          {label:'No — linguaggio colloquiale o variabile', next:{
+            q:'Le query degli utenti sono brevi e informali rispetto al testo del corpus?',hint:'Es. utenti chiedono in modo colloquiale, corpus è tecnico/formale.',
+            choices:[
+              {label:'Sì — gap vocabolario utente/corpus', result:{
+                title:'Recall su mismatch vocabolario',
+                techs:['HyDE','Document Augmentation','Multi-Query Retrieval','Step-Back Prompting'],
+                why:'HyDE genera un documento ipotetico che colma il mismatch query-breve vs testo-lungo. Document Augmentation aggiunge domande sintetiche al corpus. Multi-Query espande con varianti. Step-Back recupera il principio generale prima del dettaglio.'
+              }},
+              {label:'No — vocabolario allineato', result:{
+                title:'Recall su query complesse o multi-hop',
+                techs:['Multi-Query Retrieval','Iterative Retrieval','Step-Back Prompting','Ensemble Retrieval'],
+                why:'Multi-Query Retrieval genera varianti da angolazioni diverse. Iterative Retrieval esegue round successivi guidati dall\'analisi del contesto già recuperato. Step-Back aggiunge background context. Ensemble combina retriever specializzati.'
+              }}
+            ]
+          }}
+        ]
+      }
+    },
+    {
+      label:'Trova troppi documenti irrilevanti',
+      next:{
+        q:'Il problema è nel ranking (ordine sbagliato) o nel retrieval (recupera documenti errati)?',
+        hint:'Se i documenti giusti sono in fondo alla lista → ranking. Se non ci sono affatto → retrieval.',
+        choices:[
+          {label:'Ranking sbagliato — ordine errato', next:{
+            q:'Hai budget per un modello reranker (cross-encoder) in inferenza?',hint:'Un reranker aggiunge ~100-300ms di latenza e richiede un modello aggiuntivo.',
+            choices:[
+              {label:'Sì — posso aggiungere latenza e un modello', result:{
+                title:'Precision con reranking',
+                techs:['Reranking','ColBERT / Token-level','Fusion Retrieval'],
+                why:'Reranking (cross-encoder) è il modo più diretto per migliorare la precision: valuta ogni coppia (query, chunk) congiuntamente. ColBERT offre una via di mezzo tra bi-encoder e cross-encoder. Fusion Retrieval migliora la recall su cui il reranker poi lavora.'
+              }},
+              {label:'No — vincoli di latenza stretti', result:{
+                title:'Precision senza reranker',
+                techs:['Proposition Chunking','Contextual Chunk Headers','Multi-faceted Filtering','Optimizing Chunk Sizes'],
+                why:'Con vincoli di latenza, lavora a index-time: Proposition Chunking produce unità atomiche più precise, Contextual Chunk Headers riduce l\'ambiguità, Multi-faceted Filtering esclude documenti irrilevanti per metadati, Optimizing Chunk Sizes ottimizza la dimensione.'
+              }}
+            ]
+          }},
+          {label:'Retrieval errato — recupera documenti sbagliati', result:{
+            title:'Precision con filtri e chunking migliore',
+            techs:['Multi-faceted Filtering','Proposition Chunking','Semantic Chunking','Contextual Compression'],
+            why:'Multi-faceted Filtering esclude documenti irrilevanti prima della ricerca vettoriale. Proposition Chunking crea unità di retrieval più precise. Semantic Chunking produce chunk semanticamente coerenti. Contextual Compression riduce il rumore nei chunk recuperati.'
+          }}
+        ]
+      }
+    },
+    {
+      label:'La risposta allucinazione o non è grounded',
+      next:{
+        q:'Le allucinazioni avvengono perché il contesto recuperato è corretto ma insufficiente, o perché il modello ignora il contesto?',
+        hint:'Leggi il contesto passato all\'LLM: è pertinente? È completo?',
+        choices:[
+          {label:'Contesto pertinente ma incompleto', next:{
+            q:'Le domande richiedono informazioni da più fonti diverse (multi-hop)?',hint:'',
+            choices:[
+              {label:'Sì — risposte richiedono più fonti', result:{
+                title:'Faithfulness su query multi-hop',
+                techs:['Iterative Retrieval','RAPTOR','Graph RAG','FLARE'],
+                why:'Iterative Retrieval esegue round successivi per colmare le lacune. RAPTOR fornisce sia dettaglio che visione d\'insieme. Graph RAG traversa relazioni tra entità. FLARE recupera attivamente quando la confidenza del modello scende.'
+              }},
+              {label:'No — risposta in un unico documento', result:{
+                title:'Faithfulness su contesto singolo',
+                techs:['Reliable RAG','Corrective RAG (CRAG)','Context Window Enhancement','Document Hierarchy'],
+                why:'Reliable RAG valida il grounding dopo la generazione. CRAG corregge quando il retrieval è di bassa qualità. Context Window Enhancement espande il contesto ai chunk adiacenti. Document Hierarchy restituisce il chunk genitore completo.'
+              }}
+            ]
+          }},
+          {label:'Il modello ignora il contesto recuperato', result:{
+            title:'Faithfulness — forcing del grounding',
+            techs:['Self-RAG','Reliable RAG','Relevant Segment Extraction','Corrective RAG (CRAG)'],
+            why:'Self-RAG addestra il modello a verificare il grounding con token speciali [IsSup]. Reliable RAG aggiunge un grounding check esplicito post-generazione. RSE riduce il rumore nel contesto. CRAG corregge proattivamente quando la qualità del retrieval è bassa.'
+          }}
+        ]
+      }
+    },
+    {
+      label:'La risposta è corretta ma incompleta o parziale',
+      next:{
+        q:'Il corpus è strutturato con relazioni esplicite tra entità (grafo, ontologia, KB)?',
+        hint:'Es. dati biomedici, relazioni aziendali, ontologie di dominio.',
+        choices:[
+          {label:'Sì — corpus relazionale o a grafo', result:{
+            title:'Copertura su corpus relazionale',
+            techs:['Graph RAG','Microsoft GraphRAG','Iterative Retrieval','RAPTOR'],
+            why:'Graph RAG traversa il knowledge graph per recuperare entità correlate. Microsoft GraphRAG aggiunge community summaries per domande tematiche globali. Iterative Retrieval segue la catena di relazioni. RAPTOR fornisce visione d\'insieme + dettaglio.'
+          }},
+          {label:'No — corpus testuale non strutturato', next:{
+            q:'Il corpus è molto grande (migliaia di documenti) o ha struttura gerarchica?',hint:'',
+            choices:[
+              {label:'Sì — corpus grande o gerarchico', result:{
+                title:'Copertura su corpus grande',
+                techs:['RAPTOR','Hierarchical Indices','Microsoft GraphRAG','Ensemble Retrieval'],
+                why:'RAPTOR costruisce un albero di summary ricorsivi per coprire sia il dettaglio che la visione d\'insieme. Hierarchical Indices riduce lo spazio di ricerca progressivamente. MS GraphRAG aggiunge community summaries. Ensemble copre più angolazioni.'
+              }},
+              {label:'No — corpus medio o piccolo', result:{
+                title:'Copertura su corpus standard',
+                techs:['Step-Back Prompting','Multi-Query Retrieval','Dartboard / MMR','Iterative Retrieval'],
+                why:'Step-Back Prompting recupera il background context generale prima del dettaglio. Multi-Query esplora angolazioni diverse. MMR garantisce diversità nel contesto. Iterative Retrieval aggiunge round per colmare le lacune.'
+              }}
+            ]
+          }}
+        ]
+      }
+    },
+    {
+      label:'Il sistema funziona ma è troppo costoso o lento',
+      next:{
+        q:'Il problema è la latenza (tempo di risposta) o il costo per query (token LLM)?',
+        hint:'',
+        choices:[
+          {label:'Latenza troppo alta', result:{
+            title:'Ottimizzazione latenza',
+            techs:['Query Routing','Adaptive Retrieval','Contextual Compression','Optimizing Chunk Sizes'],
+            why:'Query Routing instrada le query semplici a retriever più veloci. Adaptive Retrieval evita pipeline pesanti per query semplici. Contextual Compression riduce i token nel context window. Optimizing Chunk Sizes riduce il numero di chunk necessari.'
+          }},
+          {label:'Costo per query troppo alto', result:{
+            title:'Ottimizzazione costo',
+            techs:['Self-RAG','Query Routing','Contextual Compression','Reliable RAG'],
+            why:'Self-RAG evita retrieval non necessari (alcune query non ne hanno bisogno). Query Routing usa modelli più economici per query semplici. Contextual Compression riduce i token passati all\'LLM. Reliable RAG evita generazioni da rifare con un check preventivo.'
+          }}
+        ]
+      }
+    }
+  ]
+};
+
+let flowPath = [];
+let flowResult = null;
+
+function initFlow(){
+  renderFlow();
+}
+
+function renderFlow(){
+  const c = document.getElementById('flow-container');
+  let html = `<div style="max-width:820px;margin:0 auto;padding:36px 40px">
+    <div class="d-tag">Tassonomia 3 di 5</div>
+    <div class="d-title" style="margin-bottom:6px">Flowchart decisionale</div>
+    <div class="flow-intro">Rispondi alle domande per ricevere una shortlist di 3–4 tecniche adatte al tuo problema specifico. Non parte dalla classificazione delle tecniche, ma dal sintomo del tuo sistema.</div>`;
+
+  // Progress
+  const depth = flowPath.length;
+  if(depth > 0 || flowResult){
+    html += `<div class="flow-progress">`;
+    for(let i=0;i<depth+(flowResult?1:0);i++) html+=`<div class="flow-progress-dot done"></div>`;
+    if(!flowResult) html+=`<div class="flow-progress-dot current"></div>`;
+    html += `</div>`;
+  }
+
+  // Walk the tree following flowPath
+  let node = FLOW_TREE;
+  let steps = [];
+  steps.push({node, choiceIdx: flowPath.length > 0 ? flowPath[0] : null});
+  for(let i=0;i<flowPath.length;i++){
+    const ci = flowPath[i];
+    if(node.choices && node.choices[ci]){
+      const next = node.choices[ci].next;
+      if(next && !next.result) {
+        node = next;
+        steps.push({node, choiceIdx: flowPath.length > i+1 ? flowPath[i+1] : null});
+      }
+    }
+  }
+
+  // Render each step
+  steps.forEach((step, si) => {
+    const {node: n, choiceIdx} = step;
+    html += `<div class="flow-step">`;
+    html += `<div class="flow-question">
+      <div class="flow-q-label">Domanda ${si+1}</div>
+      <div class="flow-q-text">${n.q}</div>`;
+    if(n.hint) html+=`<div style="font-size:11px;color:var(--muted);margin-bottom:12px;font-style:italic">${n.hint}</div>`;
+    html += `<div class="flow-choices">`;
+    n.choices.forEach((ch,ci2)=>{
+      const sel = choiceIdx === ci2;
+      html += `<div class="flow-choice${sel?' selected':''}" onclick="flowChoose(${si},${ci2})">${ch.label}</div>`;
+    });
+    html += `</div></div>`;
+    if(si < steps.length-1 || flowResult) html+=`<div class="flow-connector"></div>`;
+    html += `</div>`;
+  });
+
+  // Result
+  if(flowResult){
+    html += `<div class="flow-result">
+      <div class="flow-result-label">Tecniche consigliate</div>
+      <div class="flow-result-title">${flowResult.title}</div>
+      <div class="flow-result-techs">${flowResult.techs.map(t=>`
+        <div class="flow-tech-badge">${t}${badge(t)}</div>`).join('')}
+      </div>
+      <div class="flow-result-why">${flowResult.why}</div>
+    </div>`;
+  }
+
+  if(flowPath.length > 0 || flowResult){
+    html+=`<button class="flow-reset" onclick="flowReset()">↺ Ricomincia</button>`;
+  }
+  html += `</div>`;
+  c.innerHTML = html;
+}
+
+function flowChoose(stepIdx, choiceIdx){
+  // Trim path to stepIdx and set choice
+  flowPath = flowPath.slice(0, stepIdx);
+  flowPath.push(choiceIdx);
+  flowResult = null;
+
+  // Walk to find if this leads to a result
+  let node = FLOW_TREE;
+  for(let i=0;i<flowPath.length;i++){
+    const ci = flowPath[i];
+    if(node.choices && node.choices[ci]){
+      const chosen = node.choices[ci];
+      if(chosen.result){
+        flowResult = chosen.result;
+        break;
+      }
+      if(chosen.next){
+        if(chosen.next.result){
+          flowResult = chosen.next.result;
+          break;
+        }
+        node = chosen.next;
+      }
+    }
+  }
+  renderFlow();
+}
+
+function flowReset(){
+  flowPath=[];flowResult=null;renderFlow();
+}
+
+/* ══════════════════════════════════════════════
+   TAB 4: COMPATIBILITÀ
+══════════════════════════════════════════════ */
+const COMPAT_DATA = {
+  synergy:[
+    {techs:['Fusion Retrieval','Reranking'],verdict:'Sinergia forte',why:'Pipeline classica ad alto ROI: BM25+dense aumenta il recall, il cross-encoder ri-ordina con precision. Quasi sempre la coppia giusta da provare prima.'},
+    {techs:['HyDE','Reranking'],verdict:'Sinergia forte',why:'HyDE migliora la qualità dei candidati recuperati, Reranking li ri-ordina con precisione fine-grained. I due meccanismi non si sovrappongono.'},
+    {techs:['Contextual Chunk Headers','Semantic Chunking'],verdict:'Sinergia forte',why:'Semantic Chunking produce chunk semanticamente coerenti; l\'header aggiunge il contesto strutturale. Insieme producono chunk ottimali per retrieval preciso.'},
+    {techs:['Graph RAG','Iterative Retrieval'],verdict:'Sinergia forte',why:'Graph RAG espande il contesto relazionale, Iterative Retrieval colma le lacune con round successivi. Ideale per domande multi-hop su KB relazionali.'},
+    {techs:['Document Hierarchy','Reranking'],verdict:'Sinergia forte',why:'Parent-Child fornisce chunk piccoli per la ricerca (alta precision) e il genitore come contesto (alta coerenza). Reranking migliora ulteriormente il ranking dei figli.'},
+    {techs:['Reliable RAG','Explainable Retrieval'],verdict:'Sinergia forte',why:'Reliable RAG valida il grounding, Explainable Retrieval lo rende visibile all\'utente. Coppia naturale per sistemi ad alta affidabilità e audit trail.'},
+    {techs:['RAPTOR','Microsoft GraphRAG'],verdict:'Sinergia moderata',why:'RAPTOR copre la dimensione verticale (dettaglio→overview nel testo), MS GraphRAG copre la dimensione relazionale (entità e community). Insieme coprono tutti gli stili di domanda.'},
+    {techs:['Multi-Query Retrieval','Dartboard / MMR'],verdict:'Sinergia moderata',why:'Multi-Query espande la copertura con N varianti, MMR garantisce diversità nel set finale. La combinazione massimizza sia recall che varietà delle evidenze.'},
+    {techs:['Document Augmentation','HyDE'],verdict:'Sinergia moderata',why:'Approcci complementari allo stesso problema (mismatch vocabolario): Document Augmentation lo risolve a index-time, HyDE a query-time. ROI crescente con corpus sparse.'},
+  ],
+  redundant:[
+    {techs:['Contextual Compression','Relevant Segment Extraction'],verdict:'Ridondanza — scegli una',why:'Entrambe riducono il rumore post-retrieval ma con meccanismi diversi: RSE estrae span originali (fedeltà al testo), CC genera nuovo testo compresso (più denso). Usarle entrambe non aggiunge valore e aumenta la latenza.'},
+    {techs:['Query Transformations','Multi-Query Retrieval'],verdict:'Ridondanza parziale',why:'Query Transformations include la multi-query come subset. Se stai già usando Query Transformations con decomposizione, Multi-Query Retrieval aggiunge poco. Scegli in base alla semplicità di implementazione.'},
+    {techs:['Query Routing','Adaptive Retrieval'],verdict:'Ridondanza — scegli una',why:'Entrambe classificano la query e instradano a una strategia ottimale. Query Routing è più semplice (scelta del retriever), Adaptive Retrieval è più granulare (strategia completa). Usarle insieme crea classificatori in conflitto.'},
+    {techs:['Graph RAG','Microsoft GraphRAG'],verdict:'Ridondanza — scegli una',why:'MS GraphRAG è una versione estesa di Graph RAG con community summaries. Non ha senso usarli entrambi: scegli MS GraphRAG se vuoi i community summaries, Graph RAG base se vuoi più controllo e meno overhead.'},
+    {techs:['Self-RAG','Reliable RAG'],verdict:'Ridondanza concettuale',why:'Entrambi aggiungono un loop di self-critique, ma Self-RAG lo implementa nel modello fine-tuned mentre Reliable RAG usa LLM call esterne. In produzione si sceglie uno dei due pattern, non entrambi.'},
+  ],
+  conflict:[
+    {techs:['Contextual Compression','Context Window Enhancement'],verdict:'Conflitto di slot',why:'Contextual Compression riduce il contesto (meno token), Context Window Enhancement lo espande (più token). Sono in opposizione diretta: usarle insieme produce risultati imprevedibili e contraddittori.'},
+    {techs:['Dartboard / MMR','Reranking'],verdict:'Tensione — ordine conta',why:'MMR seleziona per diversità, Reranking seleziona per rilevanza. Se applichi MMR dopo Reranking perdi il lavoro del reranker. L\'ordine corretto è: Reranking → poi MMR solo se la diversità è prioritaria. Non applicare MMR prima.'},
+    {techs:['FLARE','Self-RAG'],verdict:'Conflitto architetturale',why:'FLARE richiede accesso ai logprobs durante la generazione; Self-RAG richiede un modello fine-tuned con token speciali. Sono due architetture alternative per il retrieval durante la generazione — non si combinano in modo sensato.'},
+    {techs:['Late Chunking','Proposition Chunking'],verdict:'Conflitto a index-time',why:'Late Chunking fa il chunking dopo l\'encoding (embedding contestuali). Proposition Chunking estrae via LLM proposizioni atomiche prima dell\'encoding. Sono strategie di chunking alternative e incompatibili: si sceglie una o l\'altra.'},
+  ],
+  neutral:[
+    {techs:['DeepEval','qualsiasi pipeline'],verdict:'Sempre compatibile',why:'DeepEval è un layer di valutazione ortogonale a tutte le tecniche. Si applica dopo qualsiasi pipeline per misurare Faithfulness, Relevancy, Precision. Non influenza il retrieval — solo lo misura.'},
+    {techs:['Explainable Retrieval','qualsiasi pipeline'],verdict:'Sempre compatibile',why:'Explainable Retrieval aggiunge trasparenza senza modificare la logica di retrieval. Si sovrappone a qualsiasi pipeline come layer di presentazione. Non crea conflitti.'},
+    {techs:['Multi-faceted Filtering','qualsiasi retriever'],verdict:'Sempre compatibile',why:'Il filtering per metadati è ortogonale alla strategia di retrieval. Si aggiunge come pre-filtro o post-filtro a qualsiasi retriever senza interferenze.'},
+  ]
+};
+
+function initCompat(){
+  const c=document.getElementById('compat-container');
+  const sections=[
+    {key:'synergy',color:'#4ecdf0',title:'Sinergie — si combinano bene',desc:'Tecniche che si potenziano a vicenda. Il ROI combinato è superiore alla somma delle parti.'},
+    {key:'redundant',color:'#c8f04e',title:'Ridondanze — coprono lo stesso slot',desc:'Tecniche che risolvono lo stesso problema in modo simile. Usarle insieme aggiunge complessità senza beneficio significativo.'},
+    {key:'conflict',color:'#f07c4e',title:'Conflitti — non usare insieme',desc:'Tecniche in opposizione diretta o che occupano lo stesso slot architetturale in modo incompatibile.'},
+    {key:'neutral',color:'#7a7870',title:'Universali — sempre compatibili',desc:'Tecniche ortogonali a tutta la pipeline. Non entrano mai in conflitto.'},
+  ];
+  let html=`<div style="max-width:1100px;margin:0 auto">
+    <div class="d-tag">Tassonomia 4 di 5</div>
+    <div class="d-title" style="margin-bottom:6px">Compatibilità e composizione</div>
+    <div class="compat-intro">Le tecniche RAG non si usano mai da sole, ma i cataloghi le trattano come indipendenti. Questa tassonomia mostra quali si potenziano, quali sono ridondanti, e quali sono in conflitto diretto. Clicca su un nome tecnica per aprire la scheda PDF.</div>`;
+  sections.forEach(sec=>{
+    html+=`<div class="compat-section">
+      <div class="compat-section-hdr"><div class="compat-section-dot" style="background:${sec.color}"></div><div class="compat-section-title" style="color:${sec.color}">${sec.title}</div></div>
+      <div class="compat-section-desc">${sec.desc}</div>
+      <div class="compat-grid">`;
+    COMPAT_DATA[sec.key].forEach(item=>{
+      const vClass={'Sinergia forte':'compat-v-syn','Sinergia moderata':'compat-v-syn','Ridondanza — scegli una':'compat-v-red','Ridondanza parziale':'compat-v-red','Ridondanza concettuale':'compat-v-red','Conflitto di slot':'compat-v-con','Tensione — ordine conta':'compat-v-con','Conflitto architetturale':'compat-v-con','Conflitto a index-time':'compat-v-con','Sempre compatibile':'compat-v-neu','Sempre compatibile':'compat-v-neu'}[item.verdict]||'compat-v-neu';
+      html+=`<div class="compat-card">
+        <div class="compat-card-techs">`;
+      item.techs.forEach((t,ti)=>{
+        const hasMap=TM[t];
+        html+=`<span class="compat-tech-name"${hasMap?` onclick="openPdf('${t.replace(/'/g,"\\'")}')" title="Apri scheda PDF"`:''}>${t}</span>`;
+        if(ti<item.techs.length-1) html+=`<span class="compat-op">+</span>`;
+      });
+      html+=`</div>
+        <div class="compat-card-verdict ${vClass}">${item.verdict}</div>
+        <div class="compat-card-why">${item.why}</div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  html+=`</div>`;
+  c.innerHTML=html;
+}
+
+/* ══════════════════════════════════════════════
+   TAB 5: PROFILO DI COSTO
+══════════════════════════════════════════════ */
+// Cost: [index_cost 0-3, query_cost 0-3, infra_cost 0-3]
+// 0=zero, 1=basso, 2=medio, 3=alto
+// note = breve spiegazione
+const COST_DATA = [
+  {name:'Basic RAG',cat:'Foundational',idx:1,qry:0,inf:1,note:'Embedding a index-time, nessuna LLM call a runtime. Solo il vector DB come infrastruttura.'},
+  {name:'Reliable RAG',cat:'Foundational',idx:0,qry:2,inf:1,note:'2 LLM call extra per query (relevance + grounding check). Latenza +200-500ms.'},
+  {name:'Optimizing Chunk Sizes',cat:'Foundational',idx:1,qry:0,inf:0,note:'Costo una tantum per la grid search offline. Nessun overhead a runtime.'},
+  {name:'Proposition Chunking',cat:'Foundational',idx:3,qry:0,inf:0,note:'1 LLM call per ogni documento a index-time. Su 10k doc = ~10k LLM call.'},
+  {name:'Document Augmentation',cat:'Foundational',idx:3,qry:0,inf:0,note:'3-5 LLM call per chunk a index-time. Costo proporzionale alla dimensione del corpus.'},
+  {name:'RAG with CSV / Structured Data',cat:'Foundational',idx:1,qry:0,inf:0,note:'Serializzazione semplice, nessuna LLM call. Solo costo di embedding.'},
+  {name:'Query Transformations',cat:'Query Enhancement',idx:0,qry:2,inf:0,note:'1-2 LLM call per riformulazione + N retrieval per ogni variante.'},
+  {name:'HyDE',cat:'Query Enhancement',idx:0,qry:1,inf:0,note:'1 LLM call per generare il documento ipotetico. Overhead modesto.'},
+  {name:'HyPE',cat:'Query Enhancement',idx:0,qry:1,inf:0,note:'1 LLM call per generare le istruzioni task-oriented. Simile a HyDE.'},
+  {name:'Step-Back Prompting',cat:'Query Enhancement',idx:0,qry:1,inf:0,note:'1 LLM call per astrazione + 2 retrieval (astratta + originale).'},
+  {name:'Multi-Query Retrieval',cat:'Query Enhancement',idx:0,qry:2,inf:0,note:'1 LLM call + N retrieval paralleli (tipicamente 3-5x il costo di retrieval).'},
+  {name:'Query Routing',cat:'Query Enhancement',idx:0,qry:1,inf:1,note:'1 classificatore leggero per query. Infrastruttura: più retriever da mantenere.'},
+  {name:'Contextual Chunk Headers',cat:'Context Enrichment',idx:1,qry:0,inf:0,note:'Overhead token 10-20% a index-time. Nessun costo aggiuntivo a runtime.'},
+  {name:'Semantic Chunking',cat:'Context Enrichment',idx:2,qry:0,inf:0,note:'Embedding per ogni frase a index-time (più embedding del chunking fisso). CPU/GPU intensive.'},
+  {name:'Context Window Enhancement',cat:'Context Enrichment',idx:0,qry:1,inf:0,note:'Lookup di chunk adiacenti a runtime. Overhead minimo, solo più token nel prompt.'},
+  {name:'Relevant Segment Extraction',cat:'Context Enrichment',idx:0,qry:2,inf:0,note:'1 LLM call per documento recuperato. Su k=8 → 8 LLM call extra per query.'},
+  {name:'Contextual Compression',cat:'Context Enrichment',idx:0,qry:2,inf:0,note:'1 LLM call per chunk a runtime. Simile a RSE ma genera nuovo testo.'},
+  {name:'Document Hierarchy',cat:'Context Enrichment',idx:1,qry:0,inf:1,note:'Doppio indice (figli + genitori) e docstore aggiuntivo. Nessun overhead LLM.'},
+  {name:'Late Chunking',cat:'Context Enrichment',idx:2,qry:0,inf:2,note:'Richiede long-context embedding model (jina-v2). Encoding intero documento = costoso.'},
+  {name:'Fusion Retrieval',cat:'Advanced Retrieval',idx:1,qry:1,inf:2,note:'Due indici separati (vector DB + BM25/ES). Due ricerche parallele per query.'},
+  {name:'Reranking',cat:'Advanced Retrieval',idx:0,qry:2,inf:2,note:'Cross-encoder per ogni coppia (query, chunk). Su 20 candidati = 20 inferenze.'},
+  {name:'Multi-faceted Filtering',cat:'Advanced Retrieval',idx:1,qry:0,inf:1,note:'Metadata a index-time, where-clause a runtime. Overhead trascurabile.'},
+  {name:'Hierarchical Indices',cat:'Advanced Retrieval',idx:2,qry:1,inf:2,note:'3 indici separati. 3 retrieval sequenziali per query. Complessità di manutenzione alta.'},
+  {name:'Ensemble Retrieval',cat:'Advanced Retrieval',idx:1,qry:2,inf:3,note:'N retriever in parallelo, ciascuno con il proprio indice e modello. Infrastruttura complessa.'},
+  {name:'Dartboard / MMR',cat:'Advanced Retrieval',idx:0,qry:1,inf:0,note:'Computazione iterativa su pool di candidati. Overhead O(k²) sul set finale, trascurabile.'},
+  {name:'Multi-modal RAG',cat:'Advanced Retrieval',idx:3,qry:0,inf:2,note:'Vision model per ogni immagine a index-time. GPT-4o captioning = costo significativo.'},
+  {name:'ColBERT / Token-level',cat:'Advanced Retrieval',idx:2,qry:1,inf:3,note:'Storage token embedding per tutti i documenti (5-10x rispetto a bi-encoder). Infrastruttura specializzata.'},
+  {name:'Iterative Retrieval',cat:'Iterative',idx:0,qry:3,inf:0,note:'N round × (1 LLM call + 1 retrieval). Su 3 round = 3x il costo base. Latenza elevata.'},
+  {name:'Adaptive Retrieval',cat:'Iterative',idx:0,qry:1,inf:1,note:'1 classificatore leggero per query. Riduce il costo totale instradando query semplici a retriever economici.'},
+  {name:'Retrieval with Feedback Loop',cat:'Iterative',idx:0,qry:0,inf:3,note:'Costo infrastrutturale: feedback store, pipeline di fine-tuning periodica, monitoring. Zero overhead a runtime.'},
+  {name:'FLARE',cat:'Iterative',idx:0,qry:3,inf:1,note:'Generazione token-by-token con retrieval attivo. Latenza variabile e imprevedibile. Logprobs richiesti.'},
+  {name:'Agentic RAG',cat:'Advanced Architecture',idx:0,qry:3,inf:2,note:'N LLM call per tool selection + N retrieval. Costo e latenza imprevedibili. Tracing essenziale.'},
+  {name:'Self-RAG',cat:'Advanced Architecture',idx:0,qry:1,inf:3,note:'Modello fine-tuned da servire. Nessuna LLM call esterna a runtime — tutto nel modello.'},
+  {name:'Corrective RAG (CRAG)',cat:'Advanced Architecture',idx:0,qry:2,inf:1,note:'1-2 LLM call per valutazione + eventuale fallback. Costo condizionale (solo se score basso).'},
+  {name:'Graph RAG',cat:'Advanced Architecture',idx:3,qry:1,inf:3,note:'Entity extraction + RE su tutto il corpus a index-time. Knowledge graph da mantenere.'},
+  {name:'Microsoft GraphRAG',cat:'Advanced Architecture',idx:3,qry:1,inf:3,note:'Come Graph RAG + community summaries. Preprocessing molto pesante (ore su corpus grandi).'},
+  {name:'RAPTOR',cat:'Advanced Architecture',idx:3,qry:1,inf:2,note:'Summary ricorsivi su tutto il corpus. Costo proporzionale alla dimensione e al numero di livelli.'},
+  {name:'Sophisticated Controllable Agent',cat:'Advanced Architecture',idx:0,qry:3,inf:2,note:'Planner + N sub-task × (retrieve + generate + verify). Costo per query molto elevato.'},
+  {name:'DeepEval',cat:'Evaluation',idx:0,qry:2,inf:1,note:'LLM-as-judge per ogni test case. Costo proporzionale alla dimensione del golden dataset.'},
+  {name:'Explainable Retrieval',cat:'Explainability',idx:0,qry:1,inf:0,note:'Metadata aggiuntivi + span extraction leggera. Overhead minimo su pipeline esistente.'},
+];
+
+let costSort='name', costFilter='all';
+const COST_CATS=['all','Foundational','Query Enhancement','Context Enrichment','Advanced Retrieval','Iterative','Advanced Architecture','Evaluation','Explainability'];
+
+function barHtml(val, cls, maxVal=3){
+  const pct = Math.round((val/maxVal)*100);
+  const labels=['zero','basso','medio','alto'];
+  return `<div class="cost-bar-wrap"><div class="cost-bar ${cls}" style="width:${Math.max(4,pct)}px"></div><span class="cost-bar-val">${labels[val]}</span></div>`;
+}
+
+function initCost(){ renderCost(); }
+
+function renderCost(){
+  const c=document.getElementById('cost-container');
+  let filtered=COST_DATA.filter(r=>costFilter==='all'||r.cat===costFilter);
+  if(costSort==='idx') filtered=[...filtered].sort((a,b)=>b.idx-a.idx);
+  else if(costSort==='qry') filtered=[...filtered].sort((a,b)=>b.qry-a.qry);
+  else if(costSort==='inf') filtered=[...filtered].sort((a,b)=>b.inf-a.inf);
+  else filtered=[...filtered].sort((a,b)=>a.name.localeCompare(b.name));
+
+  let html=`<div style="max-width:1100px;margin:0 auto;padding:36px 40px">
+    <div class="d-tag">Tassonomia 5 di 5</div>
+    <div class="d-title" style="margin-bottom:6px">Profilo di costo</div>
+    <div class="cost-intro">Ogni tecnica ha tre componenti di costo distinte e indipendenti. Self-RAG ha costo infrastrutturale alto ma costo query-time basso. FLARE ha costo query-time variabile. Reranking ha costo fisso e prevedibile. Clicca sulle intestazioni per ordinare.</div>
+    <div class="cost-legend">
+      <div class="cost-leg-item"><div class="cost-leg-dot" style="background:#4ecdf0"></div>Costo a index-time — LLM call o embedding upfront, pagato una tantum</div>
+      <div class="cost-leg-item"><div class="cost-leg-dot" style="background:#f07c4e"></div>Costo a query-time — LLM call o retrieval extra per ogni richiesta utente</div>
+      <div class="cost-leg-item"><div class="cost-leg-dot" style="background:#bc8cf0"></div>Costo infrastrutturale — modelli aggiuntivi, indici, storage, manutenzione</div>
+    </div>
+    <div class="cost-filters">`;
+  COST_CATS.forEach(cat=>{
+    html+=`<div class="cost-filter${costFilter===cat?' active':''}" onclick="setCostFilter('${cat}')">${cat==='all'?'Tutte le categorie':cat}</div>`;
+  });
+  html+=`</div>
+    <div class="cost-table-wrap"><table class="cost-table">
+      <thead><tr>
+        <th><button class="cost-sort-btn${costSort==='name'?' active':''}" onclick="setCostSort('name')">Tecnica ${costSort==='name'?'▲':''}</button></th>
+        <th><button class="cost-sort-btn${costSort==='idx'?' active':''}" onclick="setCostSort('idx')">Index-time ${costSort==='idx'?'▼':''}</button></th>
+        <th><button class="cost-sort-btn${costSort==='qry'?' active':''}" onclick="setCostSort('qry')">Query-time ${costSort==='qry'?'▼':''}</button></th>
+        <th><button class="cost-sort-btn${costSort==='inf'?' active':''}" onclick="setCostSort('inf')">Infrastruttura ${costSort==='inf'?'▼':''}</button></th>
+        <th>Note</th>
+      </tr></thead><tbody>`;
+
+  let lastCat='';
+  filtered.forEach(row=>{
+    if(costSort==='name' && row.cat!==lastCat){
+      html+=`<tr class="cost-group-row"><td colspan="5">${row.cat}</td></tr>`;
+      lastCat=row.cat;
+    }
+    html+=`<tr>
+      <td><div class="cost-tech-name" onclick="openPdf('${row.name.replace(/'/g,"\\'")}')">${row.name}${badge(row.name)}</div></td>
+      <td>${barHtml(row.idx,'cost-bar-index')}</td>
+      <td>${barHtml(row.qry,'cost-bar-query')}</td>
+      <td>${barHtml(row.inf,'cost-bar-infra')}</td>
+      <td><div class="cost-note">${row.note}</div></td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  c.innerHTML=html;
+}
+
+function setCostSort(s){costSort=s;renderCost();}
+function setCostFilter(f){costFilter=f;renderCost();}
+
+/* ─── INIT ─── */
+renderAxNav();
+renderUCNav();
+initFlow();
+initCompat();
+initCost();
+/* ─── INIT ─── */
+renderAxNav();
+renderUCNav();
+initFlow();
+initCompat();
+initCost();
+const fdl=document.getElementById('footer-dl');
+if(fdl)fdl.href=PDF_URL!=="YOUR_PDF_URL_HERE"?PDF_URL:'#';
+</script>
+<footer>
+  <div class="footer-left">
+    <span>Tassonomie di</span>
+    <a href="https://www.linkedin.com/in/fcollova/" target="_blank" class="author-link" style="font-size:11px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      Francesco Collovà
+    </a>
+    <span style="color:var(--border-active)">·</span>
+    <span>Catalogo originale: <em style="font-style:normal;color:var(--text)">RAG Techniques Catalog v2.0</em> — Francesco Collovà · <a href="mailto:francesco.collova@gmail.com" style="color:var(--muted);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">francesco.collova@gmail.com</a></span>
+    <span style="color:var(--border-active)">·</span>
+    <span>2025</span>
+  </div>
+  <div class="footer-right">
+    <a href="https://www.linkedin.com/in/fcollova/" target="_blank" class="footer-link">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      LinkedIn
+    </a>
+    <a href="https://github.com/fcollova" target="_blank" class="footer-link">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <a id="footer-dl" href="#" onclick="handleDl(event)" class="footer-link accent">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Scarica PDF
+    </a>
+  </div>
+</footer>
+
+</body>
+</html>
