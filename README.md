@@ -2,7 +2,7 @@
 
 **Autore: [Francesco Collovà](https://www.linkedin.com/in/fcollova/) · francesco.collova @ gmail.com**
 
-Uno strumento interattivo per navigare, classificare e confrontare 40 tecniche di Retrieval-Augmented Generation, basato sul catalogo originale *RAG Techniques Catalog v2.0* (2025).
+Uno strumento interattivo per navigare, classificare e confrontare 40 tecniche di Retrieval-Augmented Generation, basato sul catalogo originale *RAG Techniques Catalog v1.0* (2026).
 
 ---
 
